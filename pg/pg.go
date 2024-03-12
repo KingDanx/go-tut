@@ -3,9 +3,11 @@ package pg
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -14,9 +16,19 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type Config struct {
+	DbHost string `json:"dbHost"`
+	DbUser string `json:"dbUser"`
+	DbPass string `json:"dbPass"`
+	DbPort int    `json:"dbPort"`
+	DbName string `json:"dbName"`
+}
+
+var config Config
+
 // ? This function uses the built in go database/sql
 func Test() {
-	connStr := "connectionString"
+	connStr := "connectString"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -39,9 +51,48 @@ func Test() {
 	}
 }
 
+func GetConfig() (Config, error) {
+	// Open the configuration file
+	var config Config
+
+	//? get the working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting current working directory:", err)
+		return config, err
+	}
+
+	// Assuming config.json is in the current working directory
+	configPath := filepath.Join(cwd, "config.json")
+	fmt.Println("Path to config.json:", configPath)
+
+	configFile, err := os.Open(configPath)
+	if err != nil {
+		fmt.Println("Error opening config file:", err)
+		return config, err
+	}
+	defer configFile.Close()
+
+	// Parse the file
+	decoder := json.NewDecoder(configFile)
+	err = decoder.Decode(&config)
+	if err != nil {
+		fmt.Println("Error decoding config file:", err)
+		return config, err
+	}
+	return config, err
+}
+
 // ? this function is utilizing the pgx lib
 func TestPGX() {
-	conn, err := pgx.Connect(context.Background(), "connectionString")
+	configParse, err := GetConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to parse config: %v\n", err)
+		os.Exit(1)
+	}
+	config = configParse
+	connectString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
+	conn, err := pgx.Connect(context.Background(), connectString)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
@@ -61,8 +112,7 @@ func TestPGX() {
 
 	fmt.Println("id:", id, "name:", name, "enabled:", enabled, "parentgroup:", parentGroup)
 
-	monitorDBConnection(context.Background(), &conn)
-
+	go monitorDBConnection(context.Background(), &conn)
 }
 
 // ? Goes with the PGX version
@@ -86,6 +136,7 @@ func monitorDBConnection(ctx context.Context, dbConn **pgx.Conn) {
 				}
 			} else {
 				fmt.Println("Database connection is healthy")
+				// fmt.Printf("%#v\n", config)
 			}
 		case <-ctx.Done():
 			return // Exit the function if the context is canceled
@@ -95,7 +146,8 @@ func monitorDBConnection(ctx context.Context, dbConn **pgx.Conn) {
 
 // ? Goes with the PGX version
 func reconnect(ctx context.Context) (*pgx.Conn, error) {
-	dbConn, err := pgx.Connect(ctx, "connectionString")
+	connectString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", config.DbUser, config.DbPass, config.DbHost, config.DbPort, config.DbName)
+	dbConn, err := pgx.Connect(ctx, connectString)
 	if err != nil {
 		return nil, err
 	}
