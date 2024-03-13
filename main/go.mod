@@ -11,7 +11,7 @@ replace test/rest => ../rest
 require (
 	test/pg v0.0.0-00010101000000-000000000000
 	test/tcp v0.0.0-00010101000000-000000000000
-	test/rest v0.0.0-00010101000000-000000000000 // indirect
+	test/rest v0.0.0-00010101000000-000000000000
 )
 
 require (

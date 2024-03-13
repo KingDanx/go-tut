@@ -5,6 +5,7 @@ go 1.22.1
 replace test/pg => ../pg
 
 require github.com/gofiber/fiber/v3 v3.0.0-20240312090717-c51ff2967a60
+require test/pg v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
@@ -23,5 +24,4 @@ require (
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	test/pg v0.0.0-00010101000000-000000000000 // indirect
 )
