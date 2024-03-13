@@ -112,7 +112,7 @@ func TestPGX() {
 
 	fmt.Println("id:", id, "name:", name, "enabled:", enabled, "parentgroup:", parentGroup)
 
-	go monitorDBConnection(context.Background(), &conn)
+	monitorDBConnection(context.Background(), &conn)
 }
 
 // ? Goes with the PGX version

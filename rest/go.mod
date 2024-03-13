@@ -1,22 +1,13 @@
-module test/db
+module test/rest
 
 go 1.22.1
 
 replace test/pg => ../pg
 
-replace test/tcp => ../tcp
-
-replace test/rest => ../rest
-
-require (
-	test/pg v0.0.0-00010101000000-000000000000
-	test/tcp v0.0.0-00010101000000-000000000000
-	test/rest v0.0.0-00010101000000-000000000000 // indirect
-)
+require github.com/gofiber/fiber/v3 v3.0.0-20240312090717-c51ff2967a60
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/gofiber/fiber/v3 v3.0.0-20240312090717-c51ff2967a60 // indirect
 	github.com/gofiber/utils/v2 v2.0.0-beta.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -32,4 +23,5 @@ require (
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	test/pg v0.0.0-00010101000000-000000000000 // indirect
 )

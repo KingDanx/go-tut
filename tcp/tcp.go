@@ -2,19 +2,25 @@ package tcp
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net"
 	"os"
+	"time"
 )
 
 func Connect(ip string, port string) {
-	fmt.Println("Message received: ")
 	serverAddress := ip + ":" + port
 
-	conn, err := net.Dial("tcp", serverAddress)
+	dialer := net.Dialer{}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	conn, err := dialer.DialContext(ctx, "tcp", serverAddress)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to connect to server at %s: %v\n", serverAddress, err)
-		os.Exit(1)
+		Connect(ip, port)
+		return
 	}
 	defer conn.Close()
 

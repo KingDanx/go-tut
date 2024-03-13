@@ -2,12 +2,14 @@ package main
 
 import (
 	"test/pg"
+	"test/rest"
 	"test/tcp"
 )
 
 func main() {
 	// pg.Test()
-	pg.TestPGX()
-	go tcp.Connect("200.200.200.166", "10000")
+	go pg.TestPGX()
+	go tcp.Connect("192.168.1.152", "10000")
+	rest.RestServer()
 	select {}
 }
